@@ -130,28 +130,25 @@ def compute_derivatives(t, y, data):
     """
     On résout avec le système M*qdd = Q - c avec les définitions données au cours
     """
-    yd = [y[2],y[3],0,0]  #on déterminera les coéfficient de ¨q juste après pour avoir le yd final
-                          # -> yd = d[y]/dt -> yd = [qd1, qd2, qdd1, qdd2]
-    
     # Matrice M #
     M11 = data.m1 + data.m2
     M_other = data.m2
-    M = np.array[[M11,M_other],[M_other;M_other]]
+    M = np.array([[M11,M_other],[M_other,M_other]])
     
     # Vecteur Q #
-    Q1 = 
-    Q2 =
-    Q = np.array[Q1,Q2]
+    Q1 = sweep(t, data.t0, data.f0, data.t1, data.f1, data.Fmax)
+    Q2 = 0
+    Q = np.array([Q1,Q2])
     
     # Matrice c #
     c1 = - (data.m1 +data.m2)*data.g
     c2 = - data.m2*data.g
-    c = np.array[c1,c2]
+    c = np.array([c1,c2])
     
     # solve système
-    
-    ............    
-    # sweep function should be called here: sweep(t, data.t0, data.f0, data.t1, data.f1, data.Fmax)
+    ydd = np.linalg.solve(M,Q-c)
+
+    return np.array([y[2],y[3],ydd[0],ydd[1]])
 
 
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -177,7 +174,10 @@ def compute_dynamic_response(data):
     # Note that you can change the tolerances with rtol and atol options (see online solve_iv doc)
     #
     # Write some code here
-    ............
+    fprime = lambda t, y: compute_derivatives(t, y, data)
+    init = np.array([data.q1,data.q2,data.qd1,data.qd2])
+    sol = solve_ivp(fprime,(data.t0,data.t1),init)    
+    return sol.status
   
 
 
